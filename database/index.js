@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const fs = require('fs');
- 
-mongoose.connect('mongodb+srv://evelynbinkard:Aid3n0904@fec-product-overview-1eybm.mongodb.net/FECDB?retryWrites=true&w=majority', {useNewUrlParser: true});
+
+mongoose.connect('mongodb://127.0.0.1:27017/SDC', {useNewUrlParser: true});
 
 var db = mongoose.connection;
 
@@ -13,7 +13,7 @@ db.once('open', function() {
 });
 
 const getItem = (SS) => {
-  
+
   return Product.findOne({SS: {$eq: SS}})
 }
 
@@ -35,8 +35,6 @@ const productSchema = new Schema({
   largeImages: [String],
   summary: [String],
   SS: Number
-
-  
 });
 
 var Product = mongoose.model('Product', productSchema)
