@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const port = 3000;
-// const db = require('../database/index.js')
+const db = require('../database/PSQLremote.js')
 const cors = require('cors');
 
 app.use(cors());
@@ -15,9 +15,11 @@ app.get('/', (req, res) => res.send('Hello World!'))
 
 app.get('/:SS', (req, res) => {
 
-   // const arg = req.params.SS;
+   const arg = req.params.SS;
 
-   // db.getItem(arg).then(data => res.send(data));
+   db.getItem(arg).then(data => {
+    res.send(data.rows[0])
+    });
 })
 
 app.get('/price/:SS', (req, res) => {

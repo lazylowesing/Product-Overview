@@ -8,11 +8,22 @@ const client = new Client({
 })
 client.connect().then(console.log('connected to PSQL!')).catch(err =>console.log(err));
 
-client.query('SELECT * FROM products WHERE id=2345321', (err, res) => {
-  if(err) {
-    console.log(err ? err.stack : res.rows[0].message)
-  } else {
-    console.log(res.rows)
+const getItem = (SS) => {
+  const query = {
+    name: 'fetch-item',
+    text: 'SELECT * FROM products WHERE id = $1',
+    values: [SS],
   }
-  client.end()
-})
+
+  return client.query(query);
+}
+
+const getItemPrice = (SS) => {
+  return Product.findOne({SS: {$eq: SS}})
+}
+
+const getAllPrices =() => {
+  return Product.find({}, {price: 1, SS: 1})
+}
+
+module.exports = {getItem, getItemPrice, getAllPrices}

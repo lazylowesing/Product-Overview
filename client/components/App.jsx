@@ -157,23 +157,23 @@ class App extends Component {
 
        axios.get(`http://localhost:3000/${SS}`)
        .then(results => {
-            const editedURLs = results.data.largeImages.filter(url => url.slice(-3) === 'jpg')
-            const items = editedURLs.map((file) =>{
+            // const editedURLs = results.data.largeImages.filter(url => url.slice(-3) === 'jpg')
+            // const items = editedURLs.map((file) =>{
 
-               return `https://binkardfecimages.s3.us-east-2.amazonaws.com/FECPhotos/${results.data.SS}/${file}`
-            })
+            //    return `https://binkardfecimages.s3.us-east-2.amazonaws.com/FECPhotos/${results.data.SS}/${file}`
+            // })
 
             this.setState({
-                SS: results.data.SS,
-                itemNumber: results.data.itemNumber,
-                modelNumber: results.data.modelNumber,
+                SS: results.data.id,
+                itemNumber: results.data.modelnumber,
+                modelNumber: results.data.modelnumber,
                 name: results.data.name,
                 //    ratings: 'chris API',
                 //    avgRating: 'chris API',
                 //    percentRecommended: 'chrisAPI',
-                images: items,
-                price: results.data.price.toLocaleString("en-US", {style: "currency", currency: "USD"}).slice(1),
-                summary: results.data.summary,
+                // images: items,
+                price: results.data.price,
+                summary: ['no data yet', 'no data yet', 'no data yet'],
                 quantity: 1,
                 items: [],
                 total: 0,

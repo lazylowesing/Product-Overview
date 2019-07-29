@@ -13,7 +13,6 @@ db.once('open', function() {
 });
 
 const getItem = (SS) => {
-
   return Product.findOne({SS: {$eq: SS}})
 }
 
