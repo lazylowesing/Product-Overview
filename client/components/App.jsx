@@ -100,7 +100,7 @@ class App extends Component {
         window.addEventListener('product', e => {
             const SS = e.detail.product_id;
             this.setState({ SS }, () => {
-                this.getRatings()
+//                this.getRatings()
                 this.getItems()
                 })
        })
@@ -109,7 +109,7 @@ class App extends Component {
             const SS = e.detail.id
 
             this.setState({SS}, () => {
-                this.getRatings();
+  //              this.getRatings();
                 this.getItems();
             })
         })
@@ -140,22 +140,22 @@ class App extends Component {
 
    getRatings () {
 
-       axios.get(`http://ec2-18-225-6-113.us-east-2.compute.amazonaws.com/api/stats/${this.state.SS}`)
-        .then(results =>
+    //   axios.get(`http://ec2-18-225-6-113.us-east-2.compute.amazonaws.com/api/stats/${this.state.SS}`)
+    //    .then(results =>
 
-            this.setState({
-                ratings: results.data.reviewStats.reviewCount,
-                avgRating: results.data.reviewStats.averageStars,
-                percentRecommended: results.data.reviewStats.percentRecommended
-            })
-        )
-        .catch(err => console.log(err))
+   //         this.setState({
+     //           ratings: results.data.reviewStats.reviewCount,
+     //           avgRating: results.data.reviewStats.averageStars,
+     //           percentRecommended: results.data.reviewStats.percentRecommended
+     //       })
+     //   )
+     //   .catch(err => console.log(err))
    };
 
    getItems () {
        const SS = this.state.SS;
-
-       axios.get(`http://localhost:3000/${SS}`)
+	console.log(SS)
+       axios.get(`http://ec2-52-14-209-114.us-east-2.compute.amazonaws.com:3000/${SS}`)
        .then(results => {
             // const editedURLs = results.data.largeImages.filter(url => url.slice(-3) === 'jpg')
             // const items = editedURLs.map((file) =>{
