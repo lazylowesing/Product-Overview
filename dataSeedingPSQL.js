@@ -13,9 +13,6 @@ const {
 
 function createData(id) {
   let str = '';
-  str += id + ',';
-  str += '"' + id + '",';
-  str += faker.random.number({ min: 10000, max: 100000000 }) + ',';
   str += '"' + faker.random.alphaNumeric(6).toUpperCase() + '",';
   str += faker.finance.amount(1, 1000, 2) + ',';
   str += `"${color()} ${productMaterial()} ${productAdjective()} ${productName()}"`
@@ -38,7 +35,7 @@ function buildHead() {
 
 
 function buildMultiData(min,max, multipler) {
-  fs.writeFileSync('./sample.csv', buildHead('SS','spreadsheetId', 'itemNumber', 'modelNumber', 'price', 'name', ), {flag: 'a'});
+  fs.writeFileSync('./sample.csv', buildHead('modelNumber', 'price', 'name'), {flag: 'a'});
   console.log('head constructed')
   for(let i = min; i <= max; i++) {
     let str = '';
@@ -51,4 +48,4 @@ function buildMultiData(min,max, multipler) {
   return;
 }
 
-// buildMultiData(0,99, 100000);
+buildMultiData(0,999, 10000);
