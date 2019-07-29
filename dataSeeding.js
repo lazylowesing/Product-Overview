@@ -17,26 +17,24 @@ function imgURLs(range = 5, large = false) {
 }
 
 function generateProduct(SS) {
-  const countForImgs = Math.floor(Math.random() * 10) + 1;
+  const name = `${color()} ${productMaterial()} ${productAdjective()}, ${productName()} ${SS}`
   let item = {
     SS: SS,
-    smallImages: imgURLs(countForImgs),
-    largeImages: imgURLs(countForImgs, true),
+    smallImages: imgURLs(5),
+    largeImages: imgURLs(5, true),
     summary: [
       faker.lorem.sentence(),
       faker.lorem.sentence(),
       faker.lorem.sentence()
     ],
 
-    itemNumber: faker.random.number({ min: 10000, max: 100000000 }),
-
     modelNumber: faker.random.alphaNumeric(6).toUpperCase(),
 
     price: faker.finance.amount(1, 1000, 2),
 
-    name: `${color()} ${productMaterial()} ${productAdjective()}, ${productName()}`,
+    name: name,
 
-    spreadsheetId: SS.toString(),
+    keywords: makePre(name.toUpperCase().split(/[\s-]/)),
   };
 
   return item
@@ -54,5 +52,45 @@ async function generateDatabase(rangeMin, rangeMax) {
     console.log('saved: ', i , 'at: ', Date.now())
   }
 }
+
+function makeSuffixes(values) {
+  var results = [];
+  values.sort().forEach(function(val) {
+      var tmp, hasSuffix;
+      for (var i=0; i<val.length-2; i++) {
+          tmp = val.substr(i).toUpperCase();
+          hasSuffix = false;
+          for (var j=0; j<results.length; j++) {
+              if (results[j].indexOf(tmp) === 0) {
+                  hasSuffix = true;
+                  break;
+              }
+          }
+          if (!hasSuffix) results.push(tmp);
+      }
+  });
+  return results;
+}
+
+function makePre (values) {
+  let results = [];
+  let test = {};
+  values.forEach(keyword => {
+    let firstThree = keyword.substr(0,3);
+    let str = firstThree;
+    if(!test[firstThree]) {
+      results.push(str)
+      test[firstThree] = true;
+    }
+    for(let i = 3; i < keyword.length; i++) {
+      str += keyword[i];
+      if(!test[str])
+      results.push(str);
+      test[str] = true;
+    }
+  })
+  return results;
+}
+
 
 generateDatabase(0, 999);

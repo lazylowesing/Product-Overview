@@ -10,16 +10,14 @@ const {
   productName
 } = faker.commerce;
 
+function imgURLs(large = false) {
+  return `${Math.floor(500 * Math.random()) + (large ? 500 : 0)}.jpg`;
+}
 
-function createData(id) {
+function createData(pid) {
   let str = '';
-  str += id + ',';
-  str += '"' + id + '",';
-  str += faker.random.number({ min: 10000, max: 100000000 }) + ',';
-  str += '"' + faker.random.alphaNumeric(6).toUpperCase() + '",';
-  str += faker.finance.amount(1, 1000, 2) + ',';
-  str += `"${color()} ${productMaterial()} ${productAdjective()} ${productName()}"`
-  str += '\n'
+  str += pid + ',';
+  str += `"${imgURLs()}"` +'\n'
   return str;
 }
 
@@ -38,17 +36,19 @@ function buildHead() {
 
 
 function buildMultiData(min,max, multipler) {
-  fs.writeFileSync('./sample.csv', buildHead('SS','spreadsheetId', 'itemNumber', 'modelNumber', 'price', 'name', ), {flag: 'a'});
+  fs.writeFileSync('./images.csv', buildHead('product_id', 'image_url'), {flag: 'a'});
   console.log('head constructed')
   for(let i = min; i <= max; i++) {
     let str = '';
     for(let j = 1; j <= multipler; j++) {
-      str += createData((i * multipler) + j);
+      for(let k = 0; k < 5; k++) {
+        str += createData((i * multipler) + j);
+      }
     }
-    fs.writeFileSync('./sample.csv', str, {flag: 'a'})
+    fs.writeFileSync('./images.csv', str, {flag: 'a'})
     console.log(multipler +' record created: ' + (i+ 1) + ' times')
   }
   return;
 }
 
-// buildMultiData(0,99, 100000);
+buildMultiData(0,99, 100);
