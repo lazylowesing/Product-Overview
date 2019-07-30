@@ -1,35 +1,41 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const app = express()
-const port = 3000;
-const db = require('../database/PSQLremote.js')
-const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+var cluster = require('cluster');
 
-app.use(cors());
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: true}))
-app.use('/', express.static('./public'))
+console.log(process.env.NODE_CLUSTER_SCHED_POLICY = 'rr')
+let requests = 0;
 
+let indexHTML = fs.readFileSync(path.join(__dirname, '../public/static.html'), 'utf-8');
 
-app.get('/', (req, res) => res.send('Hello World!'))
+let buffer = new Buffer(indexHTML);
 
-app.get('/:SS', (req, res) => {
+cluster.schedulingPolicy = cluster.SCHED_RR;
+cluster.SCHED_RR;
 
-   const arg = req.params.SS;
-
-   db.getItem(arg).then(data => {
-    res.send(data.rows[0])
+if (cluster.isMaster) {
+    var numWorkers = require('os').cpus().length;
+    console.log('Master cluster setting up ' + numWorkers + ' workers...');
+    for (var i = 0; i < numWorkers; i++) {
+        cluster.fork();
+    }
+    cluster.on('online', function(worker) {
+        console.log('Worker ' + worker.process.pid + ' is online');
     });
-})
 
-app.get('/price/:SS', (req, res) => {
-    const arg = req.params.SS;
+    cluster.on('exit', function(worker, code, signal) {
+        console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+        console.log('Starting a new worker');
+        cluster.fork();
+    });
+} else {
+    var app = require('express')();
+    app.all('/*', function(req, res) {
+            console.log(process.pid, 'responsing to request');
+            res.set('Content-Type', 'text/html');
+            res.send(buffer);
+        })
+        var server = app.listen(3000, function() {
+            console.log('Process ' + process.pid + ' is listening to all incoming requests');
+        });
+}
 
-    db.getItemPrice(arg).then(data => res.json(data.price)).catch(err => console.log(err));
-})
-
-app.get('/prices/all', (req, res) => {
-    db.getAllPrices().then(results => res.json(results)).catch(err => console.log(err))
-})
-
-app.listen(port, () => console.log(`app listening on port ${port}!`))
