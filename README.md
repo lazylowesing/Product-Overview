@@ -1,20 +1,23 @@
-	Overall Goals: 
-Spin up two database options and compare performance against 10 million records.
-Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
-Design a structure that would support such an application.
-Date: July 23, 2019
+Overall Goals:
+
+
+1. Spin up two database options and compare performance against 10 million records.
+2. Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
+3. Design a structure that would support such an application.
+
+    Date: July 23, 2019
+    
 Challenges faced: Researching various DB options for the project, getting the component repos setup.
-	After researching options for DBs, decided to go with MongoDB and PostgresSQL.
+After researching options for DBs, decided to go with MongoDB and PostgresSQL.
 
 Using MongoDB for first Database choice:
-	Used npm package ‘faker’ to create a document with fake data that resembles the original Schema.
-	Faced challenges with saving documents with a reasonable pace:
-		Used async/await and db.collection.insertMany() to save reliably save ~20,000 records per second (8:54 total for 10M records)
-		Total size of the database: 3 Gigabytes
-		Next challenge: setup and seed POSTGRES SQL  DB.
+Used npm package ‘faker’ to create a document with fake data that resembles the original Schema.
+Faced challenges with saving documents with a reasonable pace:
+Used async/await and db.collection.insertMany() to save reliably save ~20,000 records per second (8:54 total for 10M records)
+Total size of the database: 3 Gigabytes
+Next challenge: setup and seed POSTGRES SQL  DB.
  
-
-Date: July 24, 2019
+    Date: July 24, 2019
 
 Started with installing and setting up a local POSTGRES SQL database.
 
