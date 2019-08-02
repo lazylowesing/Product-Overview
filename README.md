@@ -5,7 +5,7 @@
 1. Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
 1. Design a structure that would support such an application.
 
-    Date: July 23, 2019
+*Date: July 23, 2019*
 
 Challenges faced: Researching various DB options for the project, getting the component repos setup.
 After researching options for DBs, decided to go with MongoDB and PostgresSQL.
@@ -17,7 +17,7 @@ Used async/await and db.collection.insertMany() to save reliably save ~20,000 re
 Total size of the database: 3 Gigabytes
 Next challenge: setup and seed POSTGRES SQL  DB.
  
-    Date: July 24, 2019
+*Date: July 24, 2019*
 
 Started with installing and setting up a local POSTGRES SQL database.
 
@@ -43,26 +43,21 @@ Challenge: Queries by ‘SS’ (id) in MongoDB is taking multiple seconds someti
 
 Will research indexes and aggregation.
 
-    Date: July 25, 2019
+*Date: July 25, 2019*
 
 After doing some research about indexes and aggregation, ran the following command to create a unique index field around the “SS” number since every SS number will and should be unique:
 
-	 ```db.products.createIndex({SS: 1},{unique: true});```
+```db.products.createIndex({SS: 1},{unique: true});```
 
 Retested based on new index of SS number, refactored test to use full range of SS numbers (10,000,000). See results below:
-
-
 
 Next challenge: search for products by name or keywords
 
 Created an index on the full name property to reduce search time:
 
-db.products.createIndex({name: 1})
+```db.products.createIndex({name: 1})```
 
 Ran tests with complete product names with the following results:
-
-
-
 
 As expected, indexed search was a constant time lookup. About 1.5 ms for a sample size of 1M documents. (No longer first-search due to there being previous test)
 
@@ -70,29 +65,23 @@ New challenge: query a list of products by partial names and partial words
 
 At first, I tried to simply use regEx in my queries with an average search time of 2.5s for 1M document as follows:
 
-
-db.products.find({name: /.*olive.*/})
+```db.products.find({name: /.*olive.*/})```
 
 After some research, decided to add a keyword property to each document using a helper function: 
 
-
-
 These full and partial keywords allowed me to search by full and partial keywords in an exclusive manner over 1M documents. Query used:
 
-db.products.find({ keywords: { $all: ["AWESOME", "GRANITE", 'SHIRT', 'COT'] }})
-
+```db.products.find({ keywords: { $all: ["AWESOME", "GRANITE", 'SHIRT', 'COT'] }})```
 
 Test results:
 
-
-
-
 Noticing a steady increase in query time as more keywords are added. This could be caused by comparisons that mongo needs to do to ensure a document contains all the keywords.
 
-Date: July 26, 2019
+*Date: July 26, 2019*
+
 Challenge: Ramp up to 10 Million documents and test results of name and keyword searches.
 	Using the following indexes:
-        {
+        ```{
                 "v" : 2,
                 "key" : {
                         "_id" : 1
@@ -124,7 +113,7 @@ Challenge: Ramp up to 10 Million documents and test results of name and keyword 
                 },
                 "name" : "SS_1",
                 "ns" : "SDCsample.products"
-        }
+        }```
 
 	While that spins up, I will work on my PostgresSQL database to continue the setup.
 
