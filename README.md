@@ -1,12 +1,12 @@
-Overall Goals:
+<h1>Overall Goals:</h1>
 
 
 1. Spin up two database options and compare performance against 10 million records.
-2. Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
-3. Design a structure that would support such an application.
+1. Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
+1. Design a structure that would support such an application.
 
     Date: July 23, 2019
-    
+
 Challenges faced: Researching various DB options for the project, getting the component repos setup.
 After researching options for DBs, decided to go with MongoDB and PostgresSQL.
 
@@ -22,32 +22,32 @@ Next challenge: setup and seed POSTGRES SQL  DB.
 Started with installing and setting up a local POSTGRES SQL database.
 
 First challenge: seeding database with 10M records
-	Used NodeJS fs to create 10 million lines of CSV (100,000 lines per write).
-	Used COPY to insert all records into DB all at once. (~112 seconds).
+Used NodeJS fs to create 10 million lines of CSV (100,000 lines per write).
+Used COPY to insert all records into DB all at once. (~112 seconds).
 
 New challenge: Queries by id are taking multiple seconds.
-	Solution: reseeded the database with id as primary key.
+
+Solution: reseeded the database with id as primary key.
 
 Setting up Travis CI for automated tests for each new push.
 
 Writing tests for MongoDB.
 
 Testing query times for lookup by _id
-	Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
+Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
 
 Testing query times for lookup by SS number.
 
 Challenge: Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable) See below: 
 
-
-	
 Will research indexes and aggregation.
-Date: July 25, 2019
+
+    Date: July 25, 2019
 
 After doing some research about indexes and aggregation, ran the following command to create a unique index field around the “SS” number since every SS number will and should be unique:
 
-	 db.products.createIndex({SS: 1},{unique: true});
+	 ```db.products.createIndex({SS: 1},{unique: true});```
 
 Retested based on new index of SS number, refactored test to use full range of SS numbers (10,000,000). See results below:
 
