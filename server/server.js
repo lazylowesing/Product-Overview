@@ -2,15 +2,10 @@ const path = require('path');
 const fs = require('fs');
 var cluster = require('cluster');
 
-console.log(process.env.NODE_CLUSTER_SCHED_POLICY = 'rr')
-let requests = 0;
-
 let indexHTML = fs.readFileSync(path.join(__dirname, '../public/static.html'), 'utf-8');
 
-let buffer = new Buffer(indexHTML);
-
+let buffer = Buffer.from(indexHTML);
 cluster.schedulingPolicy = cluster.SCHED_RR;
-cluster.SCHED_RR;
 
 if (cluster.isMaster) {
     var numWorkers = require('os').cpus().length;
@@ -21,7 +16,7 @@ if (cluster.isMaster) {
     cluster.on('online', function(worker) {
         console.log('Worker ' + worker.process.pid + ' is online');
     });
-
+    
     cluster.on('exit', function(worker, code, signal) {
         console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
         console.log('Starting a new worker');
@@ -30,7 +25,6 @@ if (cluster.isMaster) {
 } else {
     var app = require('express')();
     app.all('/*', function(req, res) {
-            console.log(process.pid, 'responsing to request');
             res.set('Content-Type', 'text/html');
             res.send(buffer);
         })
