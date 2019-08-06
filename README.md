@@ -7,21 +7,26 @@
 
 <h3>*Date: July 23, 2019*</h3>
 
-Challenges faced: Researching various DB options for the project, getting the component repos setup.
-After researching options for DBs, decided to go with MongoDB and PostgresSQL.
+*Challenge:*
 
-Using MongoDB for first Database choice:
-Used npm package ‘faker’ to create a document with fake data that resembles the original Schema.
-Faced challenges with saving documents with a reasonable pace:
-Used async/await and db.collection.insertMany() to save reliably save ~20,000 records per second (8:54 total for 10M records)
-Total size of the database: 3 Gigabytes
-Next challenge: setup and seed POSTGRES SQL  DB.
+**Researching various DB options for the project.**
+
+*Action:*
+
+_After researching options for DBs, decided to go with MongoDB and PostgresSQL._
+
+* Using MongoDB for first Database choice:
+* Used npm package ‘faker’ to create a document with fake data that resembles the original Schema.
+* Faced challenges with saving documents with a reasonable pace:
+* Used async/await and db.collection.insertMany() to save reliably save ~20,000 records per second (8:54 total for 10M records)
+* Total size of the database: 3 Gigabytes
  
 <h3>*Date: July 24, 2019*</h3>
 
 Started with installing and setting up a local POSTGRES SQL database.
 
 *Challenge:* 
+
 **Seeding database with 10M records in order to test query times.**
 
 *Action :*
@@ -216,68 +221,87 @@ Performed some baseline tests of GET requests for the index.html file(locally).
 
 <h3>*Date: July 31, 2019*</h3>
 
-	First Challenge: Vertical Scaling
+*First Challenge:*
+       
+**Vertical Scaling**
 
-	For the static html of the proxy server, I will trim down the server to allow it to operate as fast as possible as leave the other operations to the other servers.
+*Action:*
+
+* For the static html of the proxy server, I will trim down the server to allow it to operate as fast as possible as leave the other operations to the other servers.
 	
-	Strategies:
-Loaded the index.html into buffer so I could serve it up as faster.
-Used Nodejs Cluster to fork off child processes in a round robin fashion.
+*Strategies:*
+
+* Loaded the index.html into buffer so I could serve it up as faster.
+* Used Nodejs Cluster to fork off child processes in a round robin fashion.
 
 Ran more tests using loadtest to compare times. (artillery seems to bottleneck locally around 1K requests per second). About an 100% increase in requests using child processes. Unfortunely, TC2 instances only have 1 Vcore so I don’t expect to see any difference from the cluster remotely, but the buffering should make a difference.
 
+*Results:*
+
 Localhost:
+
+![Test 14](/images/image24.png) 
+
+Remote @ 1700RPS:
+
+![Test 15](/images/image9.png) 
+
+Remote @ 2000RPS:
+
+![Test 16](/images/image8.png) 
+
+
+* Pushing to 2K requests per seconds causes latency spikes and 20%+ of request errors.
+
+* To achieve 10K requests per second, I will need to use load balancing between at least 5 instances.
+
+*New strategy:*
+
+**After doing some more research, I decided that the fastest way to serve up static files would be to have NGINX serve up the files directly. I used my current instance to test various configurations before making a fresh Ubuntu instance to run systemic tests. Here are the baseline tests with no changes to the configuration file.**
+
+
+*Results:*
+
+Nginx Only @ 1600RPS :
+
+![Test 17](/images/image3.png) 
+
+Nginx Only @2000RPS :
+
+![Test 18](/images/image21.png) 
+
+* Similar results so far to using Node.js. 
+* After several hours of testing and tweaking setting in nginx, I have concluded that t2.micro can only handle ~1500RPS sustained in various testing scenarios. (many connections).
+
+<h3>*Date: August 1, 2019*</h3>
+
+**_Turns out my conclusion to be wrong! I found that results from loadtest (similar to artillery) were limited by my laptop CPU. I made an account on loader.io and ran some basic tests against a single instance node server and I reached ~2000 RPS. When running tests against my nginx server only. I was able to reach 10K RPS with no errors and along with great response times._**
  
+*Results:*
+
+![Test 19](/images/image16.png) 
+_The free version of Loader.io only allows a max of 10K RPS when running tests. To get around this, I asked a friend to make an account and we ran our tests at the same time to find the max RPS of an nginx server on a T2.micro Ubuntu instance. The results below show two tests combining for 15K RPS!_
+
+![Test 20](/images/image12.png) 
+![Test 11](/images/image6.png) 
 
 
+_Above 15K, I saw a sudden jump in errors to 20%. I wondered if the limiting factor here was the nginx ability to respond or the bandwidth capacity of the T2.micro instance. The only way I could think of testing this would be to decrease the size of the html file and see if I saw a different in performance. After cutting the html by 50%, I was able to get 20K RPS._
 
-
-Remote @ 1700RPS
-
-
-Remote @ 2000RPS
-
-Pushing to 2K requests per seconds causes latency spikes and 20%+ of request errors.
-
-To achieve 10K requests per second, I will need to use load balancing between at least 5 instances.
-
-New strategy:
-	After doing some more research, I decided that the fastest way to serve up static files would be to have NGINX serve up the files directly. I used my current instance to test various configurations before making a fresh Ubuntu instance to run systemic tests. Here are the baseline tests with no changes to the configuration file.
-
-@1600RPS							@2000 RPS
-
-
-Similar results so far to using Node.js. 
-After several hours of testing and tweaking setting in nginx, I have concluded that t2.micro can only handle ~1500RPS sustained in various testing scenarios. (many connections).
-
-
-
-
-
-
-Date: August 1, 2019
-Turns out my conclusion to be wrong! I found that results from loadtest (similar to artillery) were limited by my laptop CPU. I made an account on loader.io and ran some basic tests against a single instance node server and I reached ~2000 RPS. When running tests against my nginx server only. I was able to reach 10K RPS with no errors and along with great response times. Results below.
- 
-
-The free version of Loader.io only allows a max of 10K RPS when running tests. To get around this, I asked a friend to make an account and we ran our tests at the same time to find the max RPS of an nginx server on a T2.micro Ubuntu instance. The results below show two tests combining for 15K RPS! 
-
-Above 15K, I saw a sudden jump in errors to 20%. I wondered if the limiting factor here was the nginx ability to respond or the bandwidth capacity of the T2.micro instance. The only way I could think of testing this would be to decrease the size of the html file and see if I saw a different in performance. After cutting the html by 50%, I was able to get 20K RPS.
-
-Date: August 2, 2019
+<h3>*Date: August 2, 2019*</h3>
 
 System Design:
 
-In order to achieve high performance, reliability, and scalability for my application, I decided on the  following overall structure:
+**In order to achieve high performance, reliability, and scalability for my application, I decided on the  following overall structure:**
 
- 
-As client requests hit the public socket (load balancer), they will be forwarded to one of three proxy servers running on a separate instance. On the proxy servers, nginx will be responsible for serving static files and handling basic routing. Requests for data will be forwarded to a Node/Express server port that will query the single database running on it’s own instance. Queries will be designed to retrieve data quickly and leave any business logic to be performed by the Node servers. 
+As client requests hit the public socket (load balancer), they will be forwarded to one of three proxy servers running on a separate instance. On the proxy servers, nginx will be responsible for serving static files and handling basic routing. Requests for data will be forwarded to a Node/Express server port that will query the single database running on it’s own instance. Queries will be designed to retrieve data quickly and leave any business logic to be performed by the Node servers.
 
-Areas for improvement and scalability:
+**Areas for improvement and scalability:**
 
-Single point of failure for the database. A read replica of the database would need to be created to ensure that the system could continue to run if one of them fails. A load balancer would need to be introduced between the servers and the databases to balance load and send write operations to the master. 
+* Single point of failure for the database. A read replica of the database would need to be created to ensure that the system could continue to run if one of them fails. A load balancer would need to be introduced between the servers and the databases to balance load and send write operations to the master. 
 Decoupling the nginx file server/router from the Node JS server. With the current setup, both would need to scale in order to scale one of the them. If the bottleneck was on the NodeJS servers, then more could be spun up without needing more nginx servers as well.
-Caching layers. Inserting a redis caching layer would decrease repetitive queries to the database.
+* Caching layers. Inserting a redis caching layer would decrease repetitive queries to the database.
 
-Summary:
+**Summary:**
 
-	This has shown me that system design requires some serious forward thinking in order to avoid potential bottlenecks and downtime later in development. I have a new appreciation for the process of designing a system that is robust and scalable. Going forward, I will take into consideration the way the front and back ends of my application are communicating and question what the best methods would be to ensure fast, reliable, and scalable solutions. 
+This has shown me that system design requires some serious forward thinking in order to avoid potential bottlenecks and downtime later in development. I have a new appreciation for the process of designing a system that is robust and scalable. Going forward, I will take into consideration the way the front and back ends of my application are communicating and question what the best methods would be to ensure fast, reliable, and scalable solutions. 
