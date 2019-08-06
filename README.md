@@ -36,7 +36,7 @@ Writing tests for MongoDB.
 Testing query times for lookup by _id
 Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
-![Test1] (https://github.com/lazylowesing/Product-Overview/blob/master/images/image1.png)
+![Test 1](/images/image1.png)
 
 Testing query times for lookup by SS number.
 
