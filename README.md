@@ -33,17 +33,20 @@ Started with installing and setting up a local POSTGRES SQL database.
 * Writing tests for MongoDB.
 * Testing query times for lookup by _id
 
-*Results*
+*Results:*
+
 ![Test 1](/images/image1.png)
 
 Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
 * Testing query times for lookup by SS number.
 
-*Challenge:* 
+*Challenge:*
+
 **Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable)**
 
 *Results:*
+
 ![Test 2](/images/image2.png)
 
 Will research indexes and aggregation tomorrow.
@@ -51,6 +54,7 @@ Will research indexes and aggregation tomorrow.
 <h3>*Date: July 25, 2019*</h3>
 
 *Action:*
+
 * After doing some research about indexes and aggregation, ran the following command to create a unique index field around the “SS” number since every SS number will and should be unique:
 
 ```db.products.createIndex({SS: 1},{unique: true});```
@@ -62,9 +66,11 @@ Will research indexes and aggregation tomorrow.
 ![Test 3](/images/image3.png)
 
 *Challenge:*
+
 **search for products by name or keywords**
 
 *Action:*
+
 Created an index on the full name property to reduce search time:
 
 ```db.products.createIndex({name: 1})```
@@ -95,14 +101,19 @@ These full and partial keywords allowed me to search by full and partial keyword
 
 ```db.products.find({ keywords: { $all: ["AWESOME", "GRANITE", 'SHIRT', 'COT'] }})```
 
-Test results:
+![Test 6](/images/image6.png)
 
 Noticing a steady increase in query time as more keywords are added. This could be caused by comparisons that mongo needs to do to ensure a document contains all the keywords.
 
-*Date: July 26, 2019*
+<h3>*Date: July 26, 2019*</h3>
 
-Challenge: Ramp up to 10 Million documents and test results of name and keyword searches.
-	Using the following indexes:
+*Challenge:* 
+
+**Ramp up to 10 Million documents and test results of name and keyword searches.**
+
+*Action:*
+* Using the following indexes:
+
         ```{
                 "v" : 2,
                 "key" : {
@@ -137,38 +148,42 @@ Challenge: Ramp up to 10 Million documents and test results of name and keyword 
                 "ns" : "SDCsample.products"
         }```
 
-	While that spins up, I will work on my PostgresSQL database to continue the setup.
+* While that spins up, I will work on my PostgresSQL database to continue the setup.
 
-	Created a ‘small’ table for the one-to-many relationship between the products and small image URLs. Inserted 50,000 records into table (5 urls per product) to do some simple query testing before ramping up the number. Queries for the id(primary key) average 0.1ms whereas the product_id take about 2-3ms. After creating an index on product_id, query times start to match the id.
+* Created a ‘small’ table for the one-to-many relationship between the products and small image URLs. Inserted 50,000 records into table (5 urls per product) to do some simple query testing before ramping up the number. Queries for the id(primary key) average 0.1ms whereas the product_id take about 2-3ms. After creating an index on product_id, query times start to match the id.
 
-After ramping up to 10 million records with both MongoDB and PostgresSQL, I ran tests to compare the difference between each database using 10 queries of random id numbers. Results below:
+* After ramping up to 10 million records with both MongoDB and PostgresSQL, I ran tests to compare the difference between each database using 10 queries of random id numbers.
 
+*Results:*
 
+![Test 7](/images/image7.png)
 
+*Direct Compare:*
 
+* MongoDB query : 
 
+```db.Product.findOne({ SS: id });```
 
+![Test 8](/images/image8.png)
 
+*PostgresSQl query : 
 
+```client.query('SELECT * FROM products WHERE id=' + id);```
 
+![Test 9](/images/image9.png)
 
+* Noticing that the mongoDB times are about 10x slower than PostgresSQL queries. I’m curious to see if this has something to do with Mongoose’s Model overhead.
 
+* I rewrote the test to bypass mongoose using ‘db.Products.collection.findOne’ and got slightly faster results.
 
-
-MongoDB query : db.Product.findOne({ SS: id });
-PostgresSQl query : client.query('SELECT * FROM products WHERE id=' + id);
-
-Noticing that the mongoDB times are about 10x slower than PostgresSQL queries. I’m curious to see if this has something to do with Mongoose’s Model overhead.
-
-I rewrote the test to bypass mongoose using ‘db.Products.collection.findOne’ and got slightly faster results.
-
-
+![Test 10](/images/image10.png)
 
 I will need to research more about what is causing the  slow queries on Mongo.
 
 My next tests will involve queries per second and stress test the database systems.
 
-Date: July 30, 2019
+<h3>*Date: July 30, 2019*</h3>
+
 After running the tests above, I have to choose POSTGRES for the database to deploy and test remotely. Query times seem to be faster even without Pooling connections and Indexing runs faster as well. 
 I setup Ubuntu on an AWS EC2 instance and did the following steps to get things ready for deploy:
 Installed NVM
