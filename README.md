@@ -21,8 +21,10 @@ Next challenge: setup and seed POSTGRES SQL  DB.
 
 Started with installing and setting up a local POSTGRES SQL database.
 
-Challenge: **Seeding database with 10M records in order to test query times.**
-Action : 
+*Challenge:* 
+**Seeding database with 10M records in order to test query times.**
+
+*Action :*
 * Used NodeJS fs to create 10 million lines of CSV (100,000 lines per write).
 * Used COPY to insert all records into DB all at once. (~112 seconds).
 * Queries by id are taking multiple seconds.
@@ -31,43 +33,63 @@ Action :
 * Writing tests for MongoDB.
 * Testing query times for lookup by _id
 
+*Results*
 ![Test 1](/images/image1.png)
 
 Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
 * Testing query times for lookup by SS number.
 
-Challenge: **Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable) See below:** 
+*Challenge:* 
+**Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable)**
 
-Will research indexes and aggregation.
-
+*Results:*
 ![Test 2](/images/image2.png)
 
-*Date: July 25, 2019*
+Will research indexes and aggregation tomorrow.
 
-After doing some research about indexes and aggregation, ran the following command to create a unique index field around the “SS” number since every SS number will and should be unique:
+<h3>*Date: July 25, 2019*</h3>
+
+*Action:*
+* After doing some research about indexes and aggregation, ran the following command to create a unique index field around the “SS” number since every SS number will and should be unique:
 
 ```db.products.createIndex({SS: 1},{unique: true});```
 
-Retested based on new index of SS number, refactored test to use full range of SS numbers (10,000,000). See results below:
+* Retested based on new index of SS number, refactored test to use full range of SS numbers (10,000,000).
 
-Next challenge: search for products by name or keywords
+*Results:*
 
+![Test 3](/images/image3.png)
+
+*Challenge:*
+**search for products by name or keywords**
+
+*Action:*
 Created an index on the full name property to reduce search time:
 
 ```db.products.createIndex({name: 1})```
 
-Ran tests with complete product names with the following results:
+*Results:*
+
+![Test 4](/images/image4.png)
 
 As expected, indexed search was a constant time lookup. About 1.5 ms for a sample size of 1M documents. (No longer first-search due to there being previous test)
 
-New challenge: query a list of products by partial names and partial words
+*Challenge:*
 
-At first, I tried to simply use regEx in my queries with an average search time of 2.5s for 1M document as follows:
+**query a list of products by partial names and partial words.**
+
+*Action:*
+
+* At first, I tried to simply use regEx in my queries with an average search time of 2.5s for 1M document as follows:
 
 ```db.products.find({name: /.*olive.*/})```
 
-After some research, decided to add a keyword property to each document using a helper function: 
+* After some research, decided to add a keyword property to each document using a helper function: 
+
+*Results:*
+
+![Test 5](/images/image5.png)
 
 These full and partial keywords allowed me to search by full and partial keywords in an exclusive manner over 1M documents. Query used:
 
