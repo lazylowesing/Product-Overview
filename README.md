@@ -35,7 +35,7 @@ Started with installing and setting up a local POSTGRES SQL database.
 
 *Results:*
 
-![Test 1](/images/image1.png)
+![Test 1](/images/image11.png)
 
 Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
@@ -47,7 +47,7 @@ Appears to be constant time lookup which probably means that the _id’s are sto
 
 *Results:*
 
-![Test 2](/images/image2.png)
+![Test 2](/images/image23.png)
 
 Will research indexes and aggregation tomorrow.
 
@@ -63,7 +63,7 @@ Will research indexes and aggregation tomorrow.
 
 *Results:*
 
-![Test 3](/images/image3.png)
+![Test 3](/images/image18.png)
 
 *Challenge:*
 
@@ -77,7 +77,7 @@ Created an index on the full name property to reduce search time:
 
 *Results:*
 
-![Test 4](/images/image4.png)
+![Test 4](/images/image2.png)
 
 As expected, indexed search was a constant time lookup. About 1.5 ms for a sample size of 1M documents. (No longer first-search due to there being previous test)
 
@@ -101,7 +101,8 @@ These full and partial keywords allowed me to search by full and partial keyword
 
 ```db.products.find({ keywords: { $all: ["AWESOME", "GRANITE", 'SHIRT', 'COT'] }})```
 
-![Test 6](/images/image6.png)
+![Test 6a](/images/image1.png)
+![Test 6b](/images/image22.png)
 
 Noticing a steady increase in query time as more keywords are added. This could be caused by comparisons that mongo needs to do to ensure a document contains all the keywords.
 
@@ -156,7 +157,6 @@ Noticing a steady increase in query time as more keywords are added. This could 
 
 *Results:*
 
-![Test 7](/images/image7.png)
 
 *Direct Compare:*
 
@@ -164,13 +164,13 @@ Noticing a steady increase in query time as more keywords are added. This could 
 
 ```db.Product.findOne({ SS: id });```
 
-![Test 8](/images/image8.png)
+![Test 7](/images/image13.png)
 
 *PostgresSQl query : 
 
 ```client.query('SELECT * FROM products WHERE id=' + id);```
 
-![Test 9](/images/image9.png)
+![Test 9](/images/image7.png)
 
 * Noticing that the mongoDB times are about 10x slower than PostgresSQL queries. I’m curious to see if this has something to do with Mongoose’s Model overhead.
 
@@ -184,30 +184,37 @@ My next tests will involve queries per second and stress test the database syste
 
 <h3>*Date: July 30, 2019*</h3>
 
-After running the tests above, I have to choose POSTGRES for the database to deploy and test remotely. Query times seem to be faster even without Pooling connections and Indexing runs faster as well. 
-I setup Ubuntu on an AWS EC2 instance and did the following steps to get things ready for deploy:
-Installed NVM
-Installed Node @ v10
-Installed POSTGRESQL
-Copied Schemas for Database
-Installed Git
-Pulled in my repo for the project
-Used my data generator js file to create a CSV file on the server with dummy data
-Loaded dummy data into POSTGRES
-Ran Mocha tests on the EC2 server for id queries.
+_After running the tests above, I have to choose POSTGRES for the database to deploy and test remotely. Query times seem to be faster even without Pooling connections and Indexing runs faster as well._
 
-Results below:
+*Challenge:*
 
+**I setup Ubuntu on an AWS EC2 instance and did the following steps to get things ready for deploy:**
 
+*Actions:*
 
+* Installed NVM
+* Installed Node @ v10
+* Installed POSTGRESQL
+* Copied Schemas for Database
+* Installed Git
+* Pulled in my repo for the project
+* Used my data generator js file to create a CSV file on the server with dummy data
+* Loaded dummy data into POSTGRES
+* Ran Mocha tests on the EC2 server for id queries.
 
+*Results:*
+
+![Test 11](/images/image4.png)
+
+![Test 12](/images/image20.png)
 
 Tests were run directly to the database. Similar results to tests that were locally.
 
 Performed some baseline tests of GET requests for the index.html file(locally). 
-Results below:
 
-Date: July 31, 2019
+![Test 13](/images/image14.png)
+
+<h3>*Date: July 31, 2019*</h3>
 
 	First Challenge: Vertical Scaling
 
