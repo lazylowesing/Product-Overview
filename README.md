@@ -5,7 +5,7 @@
 1. Experiment with various server configurations to achieve at least 10,000 requests per second for static files.
 1. Design a structure that would support such an application.
 
-*Date: July 23, 2019*
+<h3>*Date: July 23, 2019*</h3>
 
 Challenges faced: Researching various DB options for the project, getting the component repos setup.
 After researching options for DBs, decided to go with MongoDB and PostgresSQL.
@@ -17,32 +17,31 @@ Used async/await and db.collection.insertMany() to save reliably save ~20,000 re
 Total size of the database: 3 Gigabytes
 Next challenge: setup and seed POSTGRES SQL  DB.
  
-*Date: July 24, 2019*
+<h3>*Date: July 24, 2019*</h3>
 
 Started with installing and setting up a local POSTGRES SQL database.
 
-First challenge: seeding database with 10M records
-Used NodeJS fs to create 10 million lines of CSV (100,000 lines per write).
-Used COPY to insert all records into DB all at once. (~112 seconds).
-
-New challenge: Queries by id are taking multiple seconds.
-
-Solution: reseeded the database with id as primary key.
-
-Setting up Travis CI for automated tests for each new push.
-
-Writing tests for MongoDB.
-
-Testing query times for lookup by _id
-Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
+Challenge: **Seeding database with 10M records in order to test query times.**
+Action : 
+* Used NodeJS fs to create 10 million lines of CSV (100,000 lines per write).
+* Used COPY to insert all records into DB all at once. (~112 seconds).
+* Queries by id are taking multiple seconds.
+* Reseeded the database with id as primary key.
+* Spend several hours today setting up Travis CI for automated tests for each new push.
+* Writing tests for MongoDB.
+* Testing query times for lookup by _id
 
 ![Test 1](/images/image1.png)
 
-Testing query times for lookup by SS number.
+Appears to be constant time lookup which probably means that the _id’s are stored in a hash table. The first slow query can be explained by waiting for the connection to be established to DB. See below:
 
-Challenge: Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable) See below: 
+* Testing query times for lookup by SS number.
+
+Challenge: **Queries by ‘SS’ (id) in MongoDB is taking multiple seconds sometimes. It appears that there is no hasing of this value and DBMS is scanning the collection linearly to find the item. Larger SS numbers are taking significantly longer to complete. (Testing range @ 1-1,000,000 to keep times manageable) See below:** 
 
 Will research indexes and aggregation.
+
+![Test 2](/images/image2.png)
 
 *Date: July 25, 2019*
 
